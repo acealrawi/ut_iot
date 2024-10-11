@@ -3,7 +3,7 @@ from bleak import BleakClient
 from nordic_uuid import UUID
 
 async def main(address):
-    async with BleakClient(address) as client:
+    async with BleakClient(address, timeout=20) as client:
         # Connect and pair the device
         await client.pair()
         print("Connected: {0}".format(client.is_connected))
@@ -41,5 +41,5 @@ def parse_temperature_data(data):
 
 
 # Example usage
-address = "C7:D8:23:ED:7F:A5"  # Replace with your BLE device address
+address = "c9:68:a3:b0:6f:f9"
 asyncio.run(main(address))
