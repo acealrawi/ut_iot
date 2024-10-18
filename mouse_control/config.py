@@ -13,5 +13,5 @@ class Config(metaclass=SingletonMeta):
             self._config = config_data or {}
             self._initialized = True
 
-    def get(self, key):
-        return self._config.get(key, None)
+    def get_or(self, key, fallback=None):
+        return self._config.get(key, fallback)
