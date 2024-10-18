@@ -3,6 +3,7 @@ import asyncio
 import bleak
 import pyautogui
 import math
+import time
 
 class Controller:
 
@@ -85,14 +86,22 @@ def mouse(address):
         "NW": lambda: pyautogui.moveRel(-diagonal, -diagonal, duration=1)
     })
 
+def key_press(keys):
+    for key in keys:
+        pyautogui.keyDown(key)
+    time.sleep(0.5)
+    for key in keys:
+        pyautogui.keyUp(key)
+
+
 def keyboard(address):
     return Controller("keyboard", address, {
-        "North": lambda: pyautogui.hold('w'),
-        "South": lambda: pyautogui.hold('s'),
-        "East": lambda: pyautogui.hold('d'),
-        "West": lambda: pyautogui.hold('a'),
-        "NE": lambda: pyautogui.hold(['w', 'd']),
-        "SE": lambda: pyautogui.hold(['s', 'd']),
-        "SW": lambda: pyautogui.hold(['s', 'a']),
-        "NW": lambda: pyautogui.hold(['w', 'a'])
+        "North": lambda: key_press(['w']),
+        "South": lambda: key_press(['s']),
+        "East": lambda: key_press(['d']),
+        "West": lambda: key_press(['a']),
+        "NE": lambda: key_press(['w', 'd']),
+        "SE": lambda: key_press(['s', 'd']),
+        "SW": lambda: key_press(['s', 'a']),
+        "NW": lambda: key_press(['w', 'a'])
     })
