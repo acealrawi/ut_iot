@@ -68,9 +68,10 @@ class Controller:
             print(f"{self.name} :: {self.address} :: executing action for {self.current_action}")
 
         self.actions[self.current_action]()
+        self.current_action = None
 
 
-def mouse_controller(address):
+def mouse(address):
     off_diagonal = 10
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
     return Controller("mouse", address, {
@@ -84,3 +85,14 @@ def mouse_controller(address):
         "NW": lambda: pyautogui.moveRel(-diagonal, -diagonal, duration=1)
     })
 
+def keyboard(address):
+    return Controller("keyboard", address, {
+        "North": lambda: pyautogui.hold('w'),
+        "South": lambda: pyautogui.hold('s'),
+        "East": lambda: pyautogui.hold('d'),
+        "West": lambda: pyautogui.hold('a'),
+        "NE": lambda: pyautogui.hold(['w', 'd']),
+        "SE": lambda: pyautogui.hold(['s', 'd']),
+        "SW": lambda: pyautogui.hold(['s', 'a']),
+        "NW": lambda: pyautogui.hold(['w', 'a'])
+    })

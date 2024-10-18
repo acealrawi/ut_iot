@@ -6,7 +6,7 @@ import controller
 
 def instantiate_controllers():
     addresses = config.Config().get_or("addresses")
-    supported_controllers = [controller.mouse_controller]
+    supported_controllers = [controller.keyboard]
     instantiated_controllers = []
 
     for address, controller_type in zip(addresses, supported_controllers):
