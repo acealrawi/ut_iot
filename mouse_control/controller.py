@@ -7,12 +7,13 @@ import time
 
 class Controller:
 
-    def __init__(self, name, address, actions):
+    def __init__(self, name, address, actions, state):
         self.name = name
         self.address = address
         self.actions = actions
         self.current_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
+        self.state = state
 
     def _parse_data(self, data):
         result = ""
@@ -30,35 +31,15 @@ class Controller:
 
         return result
 
-    async def device_scanner(self):
-        scanner = bleak.BleakScanner()
-
-        # callback for when we get data
-        def advertisement_callback(device, advertisement_data):
-            if device.address.lower() == self.address.lower():
-                try:
-                    if self.verbosity > 1:
-                        print(f"{self.name} :: {self.address} :: advertisement_callback :: {advertisement_data}")
-                    self.current_action = self._parse_data(advertisement_data)
-                except Exception as e:
-                    if self.verbosity > 0:
-                        print(f"{self.name} :: {self.address} :: advertisement_callback :: {e}")
-
-        scanner.register_detection_callback(advertisement_callback)
-        await scanner.start()
-
-        # loop forever until we get ctrl+c
-        try:
-            while True:
+    def advertisement_callback(self, device, advertisement_data):
+        if device.address.lower() == self.address.lower():
+            try:
                 if self.verbosity > 1:
-                    print(f"{self.name} :: {self.address} :: going to sleep")
-                await asyncio.sleep(1)
-        except KeyboardInterrupt:
-            if self.verbosity > 0:
-                print(f"{self.name} :: {self.address} :: scanning interrupted")
-        finally:
-            await scanner.stop()
-
+                    print(f"{self.name} :: {self.address} :: advertisement_callback :: {advertisement_data}")
+                self.current_action = self._parse_data(advertisement_data)
+            except Exception as e:
+                if self.verbosity > 0:
+                    print(f"{self.name} :: {self.address} :: advertisement_callback :: {e}")
 
     def __call__(self):
 
@@ -68,7 +49,7 @@ class Controller:
         if self.verbosity > 0:
             print(f"{self.name} :: {self.address} :: executing action for {self.current_action}")
 
-        self.actions[self.current_action]()
+        self.actions[self.current_action](self.state)
         self.current_action = None
 
 
@@ -76,32 +57,27 @@ def mouse(address):
     off_diagonal = 10
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
     return Controller("mouse", address, {
-        "North": lambda: pyautogui.moveRel(0, -off_diagonal, duration=1),
-        "South": lambda: pyautogui.moveRel(0, off_diagonal, duration=1),
-        "East": lambda: pyautogui.moveRel(off_diagonal, 0, duration=1),
-        "West": lambda: pyautogui.moveRel(-off_diagonal, 0, duration=1),
-        "NE": lambda: pyautogui.moveRel(diagonal, -diagonal, duration=1),
-        "SE": lambda: pyautogui.moveRel(diagonal, diagonal, duration=1),
-        "SW": lambda: pyautogui.moveRel(-diagonal, diagonal, duration=1),
-        "NW": lambda: pyautogui.moveRel(-diagonal, -diagonal, duration=1)
-    })
-
-def key_press(keys):
-    for key in keys:
-        pyautogui.keyDown(key)
-    time.sleep(0.5)
-    for key in keys:
-        pyautogui.keyUp(key)
-
+        "still": lambda state: None,
+        "back": lambda state: pyautogui.moveRel(0, off_diagonal, duration=1),
+        "front": lambda state: pyautogui.moveRel(0, -off_diagonal, duration=1),
+        "left": lambda state: pyautogui.moveRel(-off_diagonal, 0, duration=1),
+        "right": lambda state: pyautogui.moveRel(off_diagonal, 0, duration=1)
+    }, {})
 
 def keyboard(address):
+    def key_press(state, keys):
+        for button in state["pressed"]:
+            pyautogui.keyUp(button)
+
+        for button in keys:
+            pyautogui.keyDown(button)
+
+        state["pressed"] = keys
+
     return Controller("keyboard", address, {
-        "North": lambda: key_press(['w']),
-        "South": lambda: key_press(['s']),
-        "East": lambda: key_press(['d']),
-        "West": lambda: key_press(['a']),
-        "NE": lambda: key_press(['w', 'd']),
-        "SE": lambda: key_press(['s', 'd']),
-        "SW": lambda: key_press(['s', 'a']),
-        "NW": lambda: key_press(['w', 'a'])
-    })
+        "still": lambda state: key_press(state, []),
+        "back": lambda state: key_press(state, ['s']),
+        "front": lambda state: key_press(state, ['w']),
+        "left": lambda state: key_press(state, ['a']),
+        "right": lambda state: key_press(state, ['d']),
+    }, {"pressed": []})
