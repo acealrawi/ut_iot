@@ -11,6 +11,7 @@ class Controller:
         self.name = name
         self.address = address
         self.actions = actions
+        self.action_values = {key: idx for idx, key in enumerate(actions, start=1)}
         self.current_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
         self.state = state
@@ -64,7 +65,7 @@ def mouse(address):
         "right": lambda state: pyautogui.moveRel(off_diagonal, 0, duration=1)
     }, {})
 
-def keyboard(address):
+def movement(address):
     def key_press(state, keys):
         for button in state["pressed"]:
             pyautogui.keyUp(button)
