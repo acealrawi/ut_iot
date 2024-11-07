@@ -20,7 +20,7 @@ class Widget(ABC):
 
 class NullWidget(Widget):
 
-    def __init__(self, sensors: list, max_history: int = 40):
+    def __init__(self, controllers: list, max_history: int = 40):
         pass
 
     def __call__(self):
@@ -31,9 +31,10 @@ class NullWidget(Widget):
 
 class ActionWidget(Widget):
 
-    def __init__(self, sensors: list, max_history: int = 40):
-        self.sensors = sensors
+    def __init__(self, controllers: list, max_history: int = 40):
+        self.controllers = controllers
         self.max_history = max_history
+        self.history = {controller.name: [] for controller in self.controllers}
 
         self.root = tk.Tk()
         self.root.title("action_plot")
@@ -44,31 +45,27 @@ class ActionWidget(Widget):
         self.frame = tk.Frame(self.root)
         self.frame.pack(expand=True, fill=tk.BOTH)
 
-        self.figure, self.axes = plt.subplots(3, 1, figsize=(5, 12))
+        self.figure, self.axes = plt.subplots(len(self.controllers), 1, figsize=(5, 12))
 
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.frame)
         self.canvas.get_tk_widget().pack(expand=True, fill=tk.BOTH)
 
     def __call__(self):
-        x = np.linspace(0, 10, 100)
+        x = np.linspace(0, self.max_history, self.max_history)
 
-        def y_formatter(x, pos):
-            if x == 0.0:
-                return 'Low'
-            elif x == 0.5:
-                return 'Medium'
-            elif x == 1.0:
-                return 'High'
-            else:
-                return ''
+        for controller, axis in zip(self.controllers, self.axes):
+            signal_values = [key for key in controller.formatter]
 
-        for index, axis in enumerate(self.axes):
-            y = np.random.random(100)
-            y_min, y_max = 0, 1
+            def y_formatter(target, pos):
+                closest_key = int(min(signal_values, key=lambda x: abs(x - target)))
+                return controller.formatter[closest_key]
+
+            y = np.random.random(self.max_history) + 2
+            y_min, y_max = min(signal_values), max(signal_values)
 
             axis.clear()
             axis.plot(x, y)
-            axis.set_title(f"Controller: {index}")
+            axis.set_title(f"{controller.name}")
             axis.set_ylim(y_min, y_max)
             axis.set_xticks([])
             axis.set_xticklabels([])

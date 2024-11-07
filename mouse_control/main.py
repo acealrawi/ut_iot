@@ -26,8 +26,8 @@ async def main_handler():
     max_history = 40
 
     interface, controllers = instantiate_controllers()
-    action_widget = widget.ActionWidget(sensors=controllers, max_history=max_history) \
-        if gui else widget.NullWidget(sensors=controllers, max_history=max_history)
+    action_widget = widget.ActionWidget(controllers=controllers, max_history=max_history) \
+        if gui else widget.NullWidget(controllers=controllers, max_history=max_history)
 
     listener = asyncio.create_task(interface.start())
     gui = asyncio.create_task(widget.widget_update_loop(action_widget))

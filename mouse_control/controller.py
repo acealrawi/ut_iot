@@ -12,6 +12,7 @@ class Controller:
         self.address = address
         self.actions = actions
         self.action_values = {key: idx for idx, key in enumerate(actions, start=1)}
+        self.formatter = {idx: key for idx, key in enumerate(actions, start=1)}
         self.current_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
         self.state = state
@@ -57,6 +58,7 @@ class Controller:
 def mouse(address):
     off_diagonal = 10
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
+
     return Controller("mouse", address, {
         "still": lambda state: None,
         "back": lambda state: pyautogui.moveRel(0, off_diagonal, duration=1),
