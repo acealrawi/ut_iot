@@ -60,11 +60,11 @@ def mouse(address):
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
 
     return Controller("mouse", address, {
-        "still": lambda state: None,
-        "back": lambda state: pyautogui.moveRel(0, off_diagonal, duration=1),
-        "front": lambda state: pyautogui.moveRel(0, -off_diagonal, duration=1),
-        "left": lambda state: pyautogui.moveRel(-off_diagonal, 0, duration=1),
-        "right": lambda state: pyautogui.moveRel(off_diagonal, 0, duration=1)
+        "still1": lambda state: None,
+        "back1": lambda state: pyautogui.moveRel(0, off_diagonal, duration=1),
+        "front1": lambda state: pyautogui.moveRel(0, -off_diagonal, duration=1),
+        "left1": lambda state: pyautogui.moveRel(-off_diagonal, 0, duration=1),
+        "right1": lambda state: pyautogui.moveRel(off_diagonal, 0, duration=1)
     }, {})
 
 def movement(address):
@@ -78,9 +78,9 @@ def movement(address):
         state["pressed"] = keys
 
     return Controller("keyboard", address, {
-        "still": lambda state: key_press(state, []),
-        "back": lambda state: key_press(state, ['s']),
-        "front": lambda state: key_press(state, ['w']),
-        "left": lambda state: key_press(state, ['a']),
-        "right": lambda state: key_press(state, ['d']),
+        "still1": lambda state: key_press(state, []),
+        "back1": lambda state: key_press(state, ['s']),
+        "front1": lambda state: key_press(state, ['w']),
+        "left1": lambda state: key_press(state, ['a']),
+        "right1": lambda state: key_press(state, ['d']),
     }, {"pressed": []})

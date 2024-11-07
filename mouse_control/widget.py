@@ -33,8 +33,14 @@ class ActionWidget(Widget):
 
     def __init__(self, controllers: list, max_history: int = 40):
         self.controllers = controllers
-        self.max_history = max_history
+
+        self.max_history = max(max_history, 3) # needed to ensure correctness later on
         self.history = {controller.name: [] for controller in self.controllers}
+
+        # populate history with minimal possible action values:
+        for controller in self.controllers:
+            action = int(min([key for key in controller.formatter]))
+            self.history[controller.name] = [action] * self.max_history
 
         self.root = tk.Tk()
         self.root.title("action_plot")
@@ -55,13 +61,20 @@ class ActionWidget(Widget):
 
         for controller, axis in zip(self.controllers, self.axes):
             signal_values = [key for key in controller.formatter]
+            y_min, y_max = min(signal_values), max(signal_values)
+
+            # update history
+            current_action = controller.action_values[controller.current_action] if controller.current_action is not None else y_min
+            # print(controller.current_action)
+            self.history[controller.name] = self.history[controller.name][1:] + [current_action]
+            # print(self.history[controller.name])
 
             def y_formatter(target, pos):
                 closest_key = int(min(signal_values, key=lambda x: abs(x - target)))
                 return controller.formatter[closest_key]
 
-            y = np.random.random(self.max_history) + 2
-            y_min, y_max = min(signal_values), max(signal_values)
+            # plot historical actions of each controller
+            y = self.history[controller.name]
 
             axis.clear()
             axis.plot(x, y)
