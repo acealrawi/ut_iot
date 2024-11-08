@@ -75,21 +75,17 @@ class Controller:
         self.actions[action_to_execute](self.state)
         self.current_action = None
 
-
-
-
 def mouse(address):
     off_diagonal = 10
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
 
-
     return Controller("mouse", address, {
         "still1": lambda state: None,
-        "back1": lambda state: pyautogui.moveRel(0, off_diagonal, duration=1),
-        "front1": lambda state: pyautogui.moveRel(0, -off_diagonal, duration=1),
-        "left1": lambda state: pyautogui.moveRel(-off_diagonal, 0, duration=1),
-        "right1": lambda state: pyautogui.moveRel(off_diagonal, 0, duration=1)
-    }, {})
+        "back1": lambda state: pyautogui.moveRel(0, off_diagonal),
+        "front1": lambda state: pyautogui.moveRel(0, -off_diagonal),
+        "left1": lambda state: pyautogui.moveRel(-off_diagonal, 0),
+        "right1": lambda state: pyautogui.moveRel(off_diagonal, 0)
+    }, {"c": "still1", "l": "still1", "x": 0, "y": 0})
 
 def movement(address):
     def key_press(state, keys):

@@ -64,10 +64,8 @@ class ActionWidget(Widget):
             y_min, y_max = min(signal_values), max(signal_values)
 
             # update history
-            current_action = controller.action_values[controller.current_action] if controller.current_action is not None else y_min
-            # print(controller.current_action)
+            current_action = controller.action_values[controller.current_action] if controller.current_action is not None else self.history[controller.name][-1]
             self.history[controller.name] = self.history[controller.name][1:] + [current_action]
-            # print(self.history[controller.name])
 
             def y_formatter(target, pos):
                 closest_key = int(min(signal_values, key=lambda x: abs(x - target)))
@@ -92,7 +90,7 @@ class ActionWidget(Widget):
 
 # this allows us to update canvas
 async def widget_update_loop(widget: Widget):
-    widget_update_every = config.Config().get_or("widget_update_every", 0.1)
+    widget_update_every = config.Config().get_or("widget_update_every", 0.01)
 
     try:
         while True:
