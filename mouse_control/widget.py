@@ -53,6 +53,9 @@ class ActionWidget(Widget):
 
         self.figure, self.axes = plt.subplots(len(self.controllers), 1, figsize=(5, 12))
 
+        if not isinstance(self.axes, list):
+            self.axes = [self.axes]
+
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.frame)
         self.canvas.get_tk_widget().pack(expand=True, fill=tk.BOTH)
 
@@ -64,7 +67,7 @@ class ActionWidget(Widget):
             y_min, y_max = min(signal_values), max(signal_values)
 
             # update history
-            current_action = controller.action_values[controller.current_action] if controller.current_action is not None else self.history[controller.name][-1]
+            current_action = controller.action_values[controller.action_to_execute] if controller.action_to_execute is not None else self.history[controller.name][-1]
             self.history[controller.name] = self.history[controller.name][1:] + [current_action]
 
             def y_formatter(target, pos):

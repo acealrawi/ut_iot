@@ -24,7 +24,7 @@ def instantiate_controllers():
 async def main_handler():
     execute_every = config.Config().get_or("execute_every", 1)
     gui = config.Config().get_or("gui", False)
-    max_history = 40
+    max_history = max(config.Config().get_or("history", 3), 3)
 
     interface, controllers = instantiate_controllers()
     action_widget = widget.ActionWidget(controllers, max_history) \
@@ -52,10 +52,11 @@ async def main_handler():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='main', description='Mouse controller utilizing external sensors')
-    parser.add_argument('--addresses', default='["c9:68:a3:b0:6f:f9", "c7:d8:23:ed:7f:a5"]', type=str, help="JSON array of MAC addresses of sensors")
+    parser.add_argument('--addresses', default='["c7:d8:23:ed:7f:a5"]', type=str, help="JSON array of MAC addresses of sensors")
     parser.add_argument('--execute_every', default=1, type=float, help="Execute every N seconds")
     parser.add_argument('--verbosity', default=0, type=int, help="Logging verbosity mode", choices=[0, 1, 2])
     parser.add_argument('--gui', action=argparse.BooleanOptionalAction, help="Enable or disable GUI")
+    parser.add_argument('--history', default=40, type=int, help="Plot history length")
 
     args = parser.parse_args()
 
@@ -63,7 +64,8 @@ if __name__ == "__main__":
         "addresses": json.loads(args.addresses),
         "execute_every": args.execute_every,
         "verbosity": args.verbosity,
-        "gui": args.gui
+        "gui": args.gui,
+        "history": args.history
     })
 
     asyncio.run(main_handler())

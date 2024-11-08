@@ -17,6 +17,7 @@ class Controller:
         self.previous_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
         self.state = state
+        self.action_to_execute = None
 
     def _parse_data(self, data):
         result = ""
@@ -59,20 +60,19 @@ class Controller:
             "right1": "left1"
         }
 
-        # Case 1: Continue previous action if current is still
-        if self.current_action == "still1" and self.previous_action:
-            action_to_execute = self.previous_action
-        # Case 2: Execute still if opposite actions detected
+        if self.current_action != "still1" and self.current_action == self.previous_action:
+            self.action_to_execute = self.previous_action
+        elif self.current_action == "still1" and self.previous_action:
+            self.action_to_execute = self.previous_action
         elif (self.current_action in opposite_actions and
             self.previous_action == opposite_actions[self.current_action]):
-            action_to_execute = "still1"
+            self.action_to_execute = "still1"
             self.previous_action = "still1"
-        # Case 3: Execute current action and update previous
         else:
-            action_to_execute = self.current_action
+            self.action_to_execute = self.current_action
             self.previous_action = self.current_action
 
-        self.actions[action_to_execute](self.state)
+        self.actions[self.action_to_execute](self.state)
         self.current_action = None
 
 def mouse(address):
