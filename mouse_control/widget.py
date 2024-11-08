@@ -1,4 +1,6 @@
 import tkinter as tk
+
+import numpy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -53,7 +55,7 @@ class ActionWidget(Widget):
 
         self.figure, self.axes = plt.subplots(len(self.controllers), 1, figsize=(5, 12))
 
-        if not isinstance(self.axes, list):
+        if not isinstance(self.axes, numpy.ndarray):
             self.axes = [self.axes]
 
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.frame)

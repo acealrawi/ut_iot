@@ -16,7 +16,7 @@ def instantiate_controllers():
 
     for address, controller_type in zip(addresses, supported_controllers):
         instantiated_controllers.append(controller_type(address))
-    
+
         interface.add_callback(instantiated_controllers[-1].advertisement_callback)
 
     return interface, instantiated_controllers
@@ -39,7 +39,6 @@ async def main_handler():
             try:
                 action_widget()
                 [controller() for controller in controllers]
-
             except Exception as e:
                 if isinstance(e, KeyboardInterrupt):
                     raise e
@@ -53,7 +52,7 @@ async def main_handler():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='main', description='Mouse controller utilizing external sensors')
-    parser.add_argument('--addresses', default='["c7:d8:23:ed:7f:a5"]', type=str, help="JSON array of MAC addresses of sensors")
+    parser.add_argument('--addresses', default='["c7:d8:23:ed:7f:a5", "c9:68:a3:b0:6f:f9", "d1:a7:55:db:22:df"]', type=str, help="JSON array of MAC addresses of sensors")
     parser.add_argument('--execute_every', default=1, type=float, help="Execute every N seconds")
     parser.add_argument('--verbosity', default=0, type=int, help="Logging verbosity mode", choices=[0, 1, 2])
     parser.add_argument('--gui', action=argparse.BooleanOptionalAction, help="Enable or disable GUI")
