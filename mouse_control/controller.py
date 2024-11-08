@@ -4,6 +4,7 @@ import bleak
 import pyautogui
 import math
 import time
+import action
 
 class Controller:
 
@@ -11,8 +12,8 @@ class Controller:
         self.name = name
         self.address = address
         self.actions = actions
-        self.action_values = {key: idx for idx, key in enumerate(actions, start=1)}
-        self.formatter = {idx: key for idx, key in enumerate(actions, start=1)}
+        self.action_values = {key: idx for idx, key in enumerate(action.string_map, start=1)}
+        self.formatter = {idx: key for idx, key in enumerate(action.string_map, start=1)}
         self.current_action = None
         self.previous_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
@@ -40,7 +41,7 @@ class Controller:
             try:
                 if self.verbosity > 1:
                     print(f"{self.name} :: {self.address} :: advertisement_callback :: {advertisement_data}")
-                self.current_action = self._parse_data(advertisement_data)
+                self.current_action = action.map_action(self._parse_data(advertisement_data))
             except Exception as e:
                 if self.verbosity > 0:
                     print(f"{self.name} :: {self.address} :: advertisement_callback :: {e}")
@@ -54,20 +55,20 @@ class Controller:
             print(f"{self.name} :: {self.address} :: executing action for {self.current_action}")
 
         opposite_actions = {
-            "back1": "front1",
-            "front1": "back1",
-            "left1": "right1",
-            "right1": "left1"
+            action.Action.BACK: action.Action.FRONT,
+            action.Action.FRONT: action.Action.BACK,
+            action.Action.LEFT: action.Action.RIGHT,
+            action.Action.RIGHT: action.Action.LEFT,
         }
 
-        if self.current_action != "still1" and self.current_action == self.previous_action:
+        if self.current_action != action.Action.STILL and self.current_action == self.previous_action:
             self.action_to_execute = self.previous_action
-        elif self.current_action == "still1" and self.previous_action:
+        elif self.current_action == action.Action.STILL and self.previous_action:
             self.action_to_execute = self.previous_action
         elif (self.current_action in opposite_actions and
             self.previous_action == opposite_actions[self.current_action]):
-            self.action_to_execute = "still1"
-            self.previous_action = "still1"
+            self.action_to_execute = action.Action.STILL
+            self.previous_action = action.Action.STILL
         else:
             self.action_to_execute = self.current_action
             self.previous_action = self.current_action
@@ -80,12 +81,12 @@ def mouse(address):
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
 
     return Controller("mouse", address, {
-        "still1": lambda state: None,
-        "back1": lambda state: pyautogui.moveRel(0, off_diagonal),
-        "front1": lambda state: pyautogui.moveRel(0, -off_diagonal),
-        "left1": lambda state: pyautogui.moveRel(-off_diagonal, 0),
-        "right1": lambda state: pyautogui.moveRel(off_diagonal, 0)
-    }, {"c": "still1", "l": "still1", "x": 0, "y": 0})
+        action.Action.STILL: lambda state: None,
+        action.Action.BACK: lambda state: pyautogui.moveRel(0, off_diagonal),
+        action.Action.FRONT: lambda state: pyautogui.moveRel(0, -off_diagonal),
+        action.Action.LEFT: lambda state: pyautogui.moveRel(-off_diagonal, 0),
+        action.Action.RIGHT: lambda state: pyautogui.moveRel(off_diagonal, 0)
+    }, {})
 
 def movement(address):
     def key_press(state, keys):
@@ -98,9 +99,9 @@ def movement(address):
         state["pressed"] = keys
 
     return Controller("keyboard", address, {
-        "still1": lambda state: key_press(state, []),
-        "back1": lambda state: key_press(state, ['s']),
-        "front1": lambda state: key_press(state, ['w']),
-        "left1": lambda state: key_press(state, ['a']),
-        "right1": lambda state: key_press(state, ['d']),
+        action.Action.STILL: lambda state: key_press(state, []),
+        action.Action.BACK: lambda state: key_press(state, ['s']),
+        action.Action.FRONT: lambda state: key_press(state, ['w']),
+        action.Action.LEFT: lambda state: key_press(state, ['a']),
+        action.Action.RIGHT: lambda state: key_press(state, ['d']),
     }, {"pressed": []})
