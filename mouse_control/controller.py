@@ -14,6 +14,7 @@ class Controller:
         self.action_values = {key: idx for idx, key in enumerate(actions, start=1)}
         self.formatter = {idx: key for idx, key in enumerate(actions, start=1)}
         self.current_action = None
+        self.previous_action = None
         self.verbosity = config.Config().get_or("verbosity", 0)
         self.state = state
 
@@ -51,13 +52,36 @@ class Controller:
         if self.verbosity > 0:
             print(f"{self.name} :: {self.address} :: executing action for {self.current_action}")
 
-        self.actions[self.current_action](self.state)
+        opposite_actions = {
+            "back1": "front1",
+            "front1": "back1",
+            "left1": "right1",
+            "right1": "left1"
+        }
+
+        # Case 1: Continue previous action if current is still
+        if self.current_action == "still1" and self.previous_action:
+            action_to_execute = self.previous_action
+        # Case 2: Execute still if opposite actions detected
+        elif (self.current_action in opposite_actions and
+            self.previous_action == opposite_actions[self.current_action]):
+            action_to_execute = "still1"
+            self.previous_action = "still1"
+        # Case 3: Execute current action and update previous
+        else:
+            action_to_execute = self.current_action
+            self.previous_action = self.current_action
+
+        self.actions[action_to_execute](self.state)
         self.current_action = None
+
+
 
 
 def mouse(address):
     off_diagonal = 10
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
+
 
     return Controller("mouse", address, {
         "still1": lambda state: None,

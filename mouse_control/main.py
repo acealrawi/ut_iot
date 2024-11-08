@@ -15,6 +15,7 @@ def instantiate_controllers():
 
     for address, controller_type in zip(addresses, supported_controllers):
         instantiated_controllers.append(controller_type(address))
+    
         interface.add_callback(instantiated_controllers[-1].advertisement_callback)
 
     return interface, instantiated_controllers
