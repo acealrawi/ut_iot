@@ -10,7 +10,8 @@ import widget
 def instantiate_controllers():
     interface = bluetooth_interface.BluetoothInterface()
     addresses = config.Config().get_or("addresses")
-    supported_controllers = [controller.mouse, controller.movement]
+    supported_controllers = [controller.mouse, controller.movement, controller.actions]
+    #supported_controllers = [controller.actions]
     instantiated_controllers = []
 
     for address, controller_type in zip(addresses, supported_controllers):

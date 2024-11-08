@@ -77,7 +77,7 @@ class Controller:
         self.current_action = None
 
 def mouse(address):
-    off_diagonal = 10
+    off_diagonal = 25
     diagonal = math.sqrt(math.pow(off_diagonal, 2) + math.pow(off_diagonal, 2))
 
     return Controller("mouse", address, {
@@ -104,4 +104,30 @@ def movement(address):
         action.Action.FRONT: lambda state: key_press(state, ['w']),
         action.Action.LEFT: lambda state: key_press(state, ['a']),
         action.Action.RIGHT: lambda state: key_press(state, ['d']),
+    }, {"pressed": []})
+
+def actions(address):
+
+    def key_press(state, keys, click=False):
+
+        if click:
+            pyautogui.mouseDown()
+            return
+
+        pyautogui.mouseUp()
+
+        for button in state["pressed"]:
+            pyautogui.keyUp(button)
+
+        for button in keys:
+            pyautogui.keyDown(button)
+
+        state["pressed"] = keys
+
+    return Controller("actions", address, {
+        action.Action.STILL: lambda state: key_press(state, []),
+        action.Action.BACK: lambda state: key_press(state, ['space']),
+        action.Action.FRONT: lambda state: key_press(state, [], True),
+        action.Action.LEFT: lambda state: key_press(state, []),
+        action.Action.RIGHT: lambda state: key_press(state, []),
     }, {"pressed": []})
